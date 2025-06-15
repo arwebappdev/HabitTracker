@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "myUnistylesApp",
-    "slug": "myUnistylesApp",
+    "name": "HabitTracker",
+    "slug": "HabitTracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myunistylesapp",
+    "scheme": "habittracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
