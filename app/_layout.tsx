@@ -1,31 +1,43 @@
-import { Stack, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { Stack, useRouter, useSegments } from "expo-router";
+import React, { useEffect } from "react";
 
+// This component handles route protection based on user's auth state
 function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
-  const isAuth = false; // Replace with real auth logic
+  const { user, isLoadingUser } = useAuth(); // get auth state
+  const segments = useSegments(); // get current route segments
 
   useEffect(() => {
-    // Only run redirect after first mount
-    setIsReady(true);
-  }, []);
+    const isLoginRoute = segments[0] === "(auth)"; // check if user is in 'auth' route group
 
-  useEffect(() => {
-    if (isReady && !isAuth) {
-      router.replace("/auth");
+    // If user is not logged in and not on login/signup page, redirect to auth page
+    if (!user && !isLoginRoute && !isLoadingUser) {
+      router.replace("/(auth)/auth");
     }
-  }, [isReady]);
 
+    // If user is logged in and is on auth page, redirect to home
+    else if (user && isLoginRoute && !isLoadingUser) {
+      router.replace("/");
+    }
+  }, [user, segments, isLoadingUser]);
+
+  // Render the app content only when auth state is properly checked
   return <>{children}</>;
 }
 
+// This is the root layout of your app
 export default function RootLayout() {
   return (
-    <RouteGuard>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </RouteGuard>
+    // Provide authentication context globally
+    <AuthProvider>
+      {/* Apply route guard logic before rendering stack screens */}
+      <RouteGuard>
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* Main app screens are nested in (tabs) folder */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </RouteGuard>
+    </AuthProvider>
   );
 }
