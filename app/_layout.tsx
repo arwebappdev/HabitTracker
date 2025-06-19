@@ -1,6 +1,8 @@
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect } from "react";
+import { PaperProvider } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // This component handles route protection based on user's auth state
 function RouteGuard({ children }: { children: React.ReactNode }) {
@@ -31,13 +33,17 @@ export default function RootLayout() {
   return (
     // Provide authentication context globally
     <AuthProvider>
-      {/* Apply route guard logic before rendering stack screens */}
-      <RouteGuard>
-        <Stack screenOptions={{ headerShown: false }}>
-          {/* Main app screens are nested in (tabs) folder */}
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </RouteGuard>
+      <PaperProvider>
+        <SafeAreaProvider>
+          {/* Apply route guard logic before rendering stack screens */}
+          <RouteGuard>
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* Main app screens are nested in (tabs) folder */}
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          </RouteGuard>
+        </SafeAreaProvider>
+      </PaperProvider>
     </AuthProvider>
   );
 }
