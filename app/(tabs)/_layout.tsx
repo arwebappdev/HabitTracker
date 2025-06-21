@@ -10,7 +10,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "blue", // Set active tab color to blue
-        headerStyle: { backgroundColor: "#f5f5f5" },
+        headerShown: false,
       }}
     >
       {/* Home Screen Tab Configuration */}

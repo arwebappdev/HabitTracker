@@ -14,6 +14,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { ID, Query } from "react-native-appwrite";
 import { Swipeable } from "react-native-gesture-handler";
 import { Button, Surface, Text } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const { signOut, user } = useAuth();
@@ -154,7 +155,7 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.title}>
           Today's Habits
@@ -223,20 +224,31 @@ export default function Index() {
           ))
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 24,
   },
-  title: { fontWeight: "bold" },
-  emptyState: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyStateText: { color: "#666" },
+  title: {
+    fontWeight: "bold",
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyStateText: {
+    color: "#666",
+  },
   card: {
     marginBottom: 18,
     borderRadius: 18,
