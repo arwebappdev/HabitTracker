@@ -1,15 +1,16 @@
 import { useAuth } from "@/lib/auth-context"; // Import authentication context
 import { MaterialCommunityIcons } from "@expo/vector-icons"; // Icon set used for focused tab icon
 import { Tabs } from "expo-router"; // Expo Router Tabs component for navigation
+import { useTheme } from "react-native-paper";
 
 export default function TabsLayout() {
   const { user } = useAuth(); // Access the authenticated user from context
-
+  const theme = useTheme();
   return (
     // Main Tabs layout container
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "blue", // Set active tab color to blue
+        tabBarActiveTintColor: theme.colors.primary, // Set active tab color to blue
         headerShown: false,
       }}
     >

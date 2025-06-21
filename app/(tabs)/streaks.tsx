@@ -12,15 +12,15 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Query } from "react-native-appwrite";
 import { ScrollView } from "react-native-gesture-handler";
-import { Card, Text } from "react-native-paper";
+import { Surface, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Streaks = () => {
   const { user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
-  const [completedHabits, setCompletedHabits] = useState<HabitCompletion[]>([]); // ✅ fixed type
+  const [completedHabits, setCompletedHabits] = useState<HabitCompletion[]>([]);
+  const theme = useTheme();
 
-  // Fetch all habits
   const fetchHabits = async () => {
     try {
       const res = await databases.listDocuments(
@@ -34,7 +34,6 @@ const Streaks = () => {
     }
   };
 
-  // Fetch all completions
   const fetchCompletions = async () => {
     try {
       const res = await databases.listDocuments(
@@ -88,37 +87,30 @@ const Streaks = () => {
 
   const getStreakData = (habitId: string) => {
     const habitCompletions = completedHabits
-      ?.filter((c) => c.habit_id === habitId)
+      .filter((c) => c.habit_id === habitId)
       .sort(
         (a, b) =>
           new Date(a.completed_at).getTime() -
           new Date(b.completed_at).getTime()
       );
 
-    if (!habitCompletions || habitCompletions.length === 0) {
-      return { streak: 0, bestStreak: 0, total: 0 };
-    }
+    if (!habitCompletions.length) return { streak: 0, bestStreak: 0, total: 0 };
 
-    let bestStreak = 0;
-    let currentStreak = 0;
-    let total = habitCompletions.length;
-    let lastDate: Date | null = null;
+    let bestStreak = 0,
+      currentStreak = 0,
+      total = habitCompletions.length,
+      lastDate: Date | null = null;
 
     habitCompletions.forEach((c) => {
       const date = new Date(c.completed_at);
       if (lastDate) {
         const diff =
           (date.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
-        if (diff <= 1.5) {
-          currentStreak += 1;
-        } else {
-          currentStreak = 1;
-        }
+        currentStreak = diff <= 1.5 ? currentStreak + 1 : 1;
       } else {
         currentStreak = 1;
       }
-
-      if (currentStreak > bestStreak) bestStreak = currentStreak;
+      bestStreak = Math.max(bestStreak, currentStreak);
       lastDate = date;
     });
 
@@ -130,17 +122,27 @@ const Streaks = () => {
     return { habit, streak, bestStreak, total };
   });
 
-  const rankedHabits = habitStreaks.sort((a, b) => b.bestStreak - a.bestStreak); // ⬆️ highest first
+  const rankedHabits = habitStreaks.sort((a, b) => b.bestStreak - a.bestStreak);
 
   const badgeStyles = [styles.badge1, styles.badge2, styles.badge3];
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title} variant="headlineSmall">
-        Habit Streaks
-      </Text>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <View style={styles.header}>
+        <Text style={styles.title} variant="headlineSmall">
+          Habit Streaks
+        </Text>
+      </View>
 
       {rankedHabits.length > 0 && (
-        <View style={styles.rankingContainer}>
+        <View
+          style={[
+            styles.rankingContainer,
+            { backgroundColor: theme.colors.elevation.level1 },
+          ]}
+        >
           <Text style={styles.rankingTitle}>🏅 Top Streaks</Text>
           {rankedHabits.slice(0, 3).map((item, key) => (
             <View key={key} style={styles.rankingRow}>
@@ -161,33 +163,53 @@ const Streaks = () => {
           </Text>
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {rankedHabits.map(({ habit, streak, bestStreak, total }, key) => (
-            <Card
-              key={habit.$id}
-              style={[styles.card, key === 0 && styles.firstCard]}
-            >
-              <Card.Content>
-                <Text variant="titleMedium" style={styles.habitTitle}>
-                  {habit.title}
-                </Text>
-                <Text style={styles.habitDescription}>{habit.description}</Text>
-                <View style={styles.statsRow}>
-                  <View style={styles.stateBadge}>
-                    <Text style={styles.stateBadgeText}>🔥{streak}</Text>
-                    <Text style={styles.stateBadgeLabel}>Current</Text>
-                  </View>
-                  <View style={styles.stateBadgeGold}>
-                    <Text style={styles.stateBadgeText}>🏆{bestStreak}</Text>
-                    <Text style={styles.stateBadgeLabel}>Best</Text>
-                  </View>
-                  <View style={styles.stateBadgeGreen}>
-                    <Text style={styles.stateBadgeText}>📊{total}</Text>
-                    <Text style={styles.stateBadgeLabel}>Total</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 24, margin: 0 }}
+        >
+          {rankedHabits.map(({ habit, streak, bestStreak, total }) => (
+            <View key={habit.$id} style={{ overflow: "visible" }}>
+              <Surface
+                elevation={3}
+                style={[
+                  styles.card,
+                  { backgroundColor: theme.colors.elevation.level1 },
+                ]}
+              >
+                <View style={styles.cardContent}>
+                  <Text
+                    style={[
+                      styles.habitTitle,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {habit.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.habitDescription,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {habit.description}
+                  </Text>
+                  <View style={styles.statsRow}>
+                    <View style={styles.stateBadge}>
+                      <Text style={styles.stateBadgeText}>🔥{streak}</Text>
+                      <Text style={styles.stateBadgeLabel}>Current</Text>
+                    </View>
+                    <View style={styles.stateBadgeGold}>
+                      <Text style={styles.stateBadgeText}>🏆{bestStreak}</Text>
+                      <Text style={styles.stateBadgeLabel}>Best</Text>
+                    </View>
+                    <View style={styles.stateBadgeGreen}>
+                      <Text style={styles.stateBadgeText}>📊{total}</Text>
+                      <Text style={styles.stateBadgeLabel}>Total</Text>
+                    </View>
                   </View>
                 </View>
-              </Card.Content>
-            </Card>
+              </Surface>
+            </View>
           ))}
         </ScrollView>
       )}
@@ -198,51 +220,39 @@ const Streaks = () => {
 export default Streaks;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
+  container: { flex: 1, padding: 0 },
+  header: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 16,
   },
-  emptyStateText: {
-    color: "#666",
-  },
-  title: {
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
+  title: { fontWeight: "bold" },
+  emptyState: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyStateText: { color: "#888" },
   card: {
-    marginBottom: 18,
     borderRadius: 18,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
+    margin: 10,
+    overflow: "visible",
   },
-  firstCard: {
-    borderWidth: 2,
-    borderColor: "#7c4dff",
+  cardContent: {
+    padding: 16,
+    paddingBottom: 6,
   },
   habitTitle: {
     fontWeight: "bold",
-    fontSize: 18,
-    marginBottom: 2,
+    fontSize: 24,
+    margin: 2,
+    marginBottom: 4,
   },
   habitDescription: {
-    color: "#6c6c80",
-    marginBottom: 8,
+    margin: 2,
   },
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 12,
-    marginTop: 8,
+    marginTop: 20,
   },
   stateBadge: {
     backgroundColor: "#fff3e0",
@@ -271,7 +281,6 @@ const styles = StyleSheet.create({
   stateBadgeText: {
     fontWeight: "bold",
     fontSize: 15,
-
     color: "#22223b",
   },
   stateBadgeLabel: {
@@ -281,8 +290,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   rankingContainer: {
-    marginBottom: 24,
-    backgroundColor: "#fff",
+    marginTop: 10,
+    margin: 16,
     borderRadius: 16,
     padding: 16,
     elevation: 2,
@@ -290,6 +299,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
+    overflow: "visible",
   },
   rankingTitle: {
     fontWeight: "bold",
@@ -315,15 +325,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: "#e0e0e0",
   },
-  badge1: {
-    backgroundColor: "#ffd700",
-  },
-  badge2: {
-    backgroundColor: "#c0c0c0",
-  },
-  badge3: {
-    backgroundColor: "#cd7f32",
-  },
+  badge1: { backgroundColor: "#ffd700" },
+  badge2: { backgroundColor: "#c0c0c0" },
+  badge3: { backgroundColor: "#cd7f32" },
   rankingBadgeText: {
     fontWeight: "bold",
     color: "#fff",
