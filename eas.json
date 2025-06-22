@@ -18,11 +18,10 @@
   "submit": {
     "production": {}
   },
-  "luna": {
-    "android": {
-      "buildType": "apk",
-      "distribution": "internal",
-      "developmentClient": true
-    }
+
+  "android": {
+    "buildType": "apk",
+    "distribution": "internal",
+    "developmentClient": true
   }
 }
