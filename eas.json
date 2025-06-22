@@ -17,5 +17,12 @@
   },
   "submit": {
     "production": {}
+  },
+  "luna": {
+    "android": {
+      "buildType": "apk",
+      "distribution": "internal",
+      "developmentClient": true
+    }
   }
 }

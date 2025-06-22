@@ -9,6 +9,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { Habit, HabitCompletion } from "@/types/database.type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import "expo-router/entry";
 import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, useColorScheme, View } from "react-native";
 import { ID, Query } from "react-native-appwrite";
@@ -148,7 +149,7 @@ export default function Index() {
     >
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.title}>
-          Today's Habits
+          Today&apos;s Habits
         </Text>
         <Button mode="text" icon="logout" onPress={signOut}>
           Sign Out
@@ -175,7 +176,9 @@ export default function Index() {
               <Swipeable
                 containerStyle={{ overflow: "visible" }}
                 key={habit.$id}
-                ref={(ref) => (swipeableRefs.current[habit.$id] = ref)}
+                ref={(ref) => {
+                  if (ref) swipeableRefs.current[habit.$id] = ref;
+                }}
                 renderLeftActions={renderLeftActions}
                 renderRightActions={() => renderRightActions(habit.$id)}
                 onSwipeableOpen={(dir) =>
