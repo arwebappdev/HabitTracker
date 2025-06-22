@@ -17,11 +17,5 @@
   },
   "submit": {
     "production": {}
-  },
-
-  "android": {
-    "buildType": "apk",
-    "distribution": "internal",
-    "developmentClient": true
   }
 }
