@@ -14,8 +14,7 @@ import { Query } from "react-native-appwrite";
 import { ScrollView } from "react-native-gesture-handler";
 import { Surface, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const Streaks = () => {
+export default function Streaks() {
   const { user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [completedHabits, setCompletedHabits] = useState<HabitCompletion[]>([]);
@@ -215,9 +214,7 @@ const Streaks = () => {
       )}
     </SafeAreaView>
   );
-};
-
-export default Streaks;
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 0 },

@@ -15,8 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const FREQUENCIES = ["daily", "weekly", "monthly"];
 type Frequency = (typeof FREQUENCIES)[number];
-
-const AddHabit = () => {
+export default function AddHabit() {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [frequency, setFrequency] = useState<string>("");
@@ -115,9 +114,7 @@ const AddHabit = () => {
       </View>
     </SafeAreaView>
   );
-};
-
-export default AddHabit;
+}
 
 const styles = StyleSheet.create({
   container: {

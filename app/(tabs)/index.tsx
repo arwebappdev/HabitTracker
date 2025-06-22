@@ -11,7 +11,7 @@ import { Habit, HabitCompletion } from "@/types/database.type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import "expo-router/entry";
 import React, { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, useColorScheme, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { ID, Query } from "react-native-appwrite";
 import { Swipeable } from "react-native-gesture-handler";
 import { Button, Surface, Text, useTheme } from "react-native-paper";
@@ -22,7 +22,7 @@ export default function Index() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
   const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
-  const scheme = useColorScheme();
+
   const theme = useTheme();
 
   const fetchHabits = async () => {
@@ -92,7 +92,7 @@ export default function Index() {
       unsubHabits();
       unsubComps();
     };
-  }, [user]);
+  });
 
   const isHabitCompleted = (id: string) => completedHabits.includes(id);
 

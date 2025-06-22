@@ -33,7 +33,7 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
 export default function RootLayout() {
   return (
     // Provide authentication context globally
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
         <PaperProvider>
           <SafeAreaProvider>

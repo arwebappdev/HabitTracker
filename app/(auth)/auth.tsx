@@ -11,7 +11,7 @@ import {
 import { Button, Text, TextInput } from "react-native-paper";
 
 // Main authentication screen component (login/signup)
-const AuthScreen = () => {
+export default function AuthScreen() {
   // State variables for form inputs and mode toggle
   const [isSignUp, setIsSignUp] = useState<boolean>(false); // true = SignUp mode, false = SignIn mode
   const [email, setEmail] = useState<string>(""); // Email input
@@ -128,9 +128,7 @@ const AuthScreen = () => {
       </View>
     </KeyboardAvoidingView>
   );
-};
-
-export default AuthScreen;
+}
 
 // Component styles
 const styles = StyleSheet.create({
