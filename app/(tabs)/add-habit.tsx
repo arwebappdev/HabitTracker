@@ -26,7 +26,11 @@ export default function AddHabit() {
   const theme = useTheme();
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user) {
+      setError("User not logged in.");
+      return;
+    }
+
     try {
       await databases.createDocument(
         DATABASE_ID,
@@ -42,17 +46,22 @@ export default function AddHabit() {
           created_at: new Date().toISOString(),
         }
       );
+
+      // Reset form only after success
+      setTitle("");
+      setDescription("");
+      setFrequency("");
+      setError("");
       router.back();
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-        return;
+    } catch (err) {
+      console.error("Create Habit Error:", err);
+
+      if (err instanceof Error && err.message) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
       }
-      setError("There was an error creating the habit.");
     }
-    setTitle("");
-    setDescription("");
-    setFrequency("");
   };
 
   return (

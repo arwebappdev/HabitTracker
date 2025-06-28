@@ -63,36 +63,43 @@ export default function Index() {
     const habitsChannel = `databases.${DATABASE_ID}.collections.${HABITS_COLLECTION_ID}.documents`;
     const completionsChannel = `databases.${DATABASE_ID}.collections.${COMPLETIONS_COLLECTION_ID}.documents`;
 
-    const unsubHabits = client.subscribe(
-      habitsChannel,
-      (resp: RealTimeResponse) => {
-        if (
-          resp.events.some((e) =>
-            /documents\..*\.(create|update|delete)$/.test(e)
-          )
-        ) {
-          fetchHabits();
-        }
-      }
-    );
+    let unsubHabits: () => void = () => {};
+    let unsubComps: () => void = () => {};
 
-    const unsubComps = client.subscribe(
-      completionsChannel,
-      (resp: RealTimeResponse) => {
-        if (resp.events.some((e) => /documents\..*\.create$/.test(e))) {
-          fetchTodayCompletions();
+    try {
+      unsubHabits = client.subscribe(
+        habitsChannel,
+        (resp: RealTimeResponse) => {
+          if (
+            resp.events.some((e) =>
+              /documents\..*\.(create|update|delete)$/.test(e)
+            )
+          ) {
+            fetchHabits();
+          }
         }
-      }
-    );
+      );
+
+      unsubComps = client.subscribe(
+        completionsChannel,
+        (resp: RealTimeResponse) => {
+          if (resp.events.some((e) => /documents\..*\.create$/.test(e))) {
+            fetchTodayCompletions();
+          }
+        }
+      );
+    } catch (err) {
+      console.error("Realtime subscription failed:", err);
+    }
 
     fetchHabits();
     fetchTodayCompletions();
 
     return () => {
-      unsubHabits();
-      unsubComps();
+      unsubHabits?.();
+      unsubComps?.();
     };
-  });
+  }, [user]);
 
   const isHabitCompleted = (id: string) => completedHabits.includes(id);
 
@@ -143,6 +150,19 @@ export default function Index() {
     </View>
   );
 
+  const handleSwipe = (direction: string, id: string) => {
+    // Delay to avoid gesture glitch
+    requestAnimationFrame(() => {
+      if (direction === "left") {
+        handleDelete(id);
+      } else {
+        handleComplete(id);
+      }
+      // Close swipeable after action to reset UI
+      swipeableRefs.current[id]?.close?.();
+    });
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -174,18 +194,14 @@ export default function Index() {
           habits.map((habit) => (
             <View key={habit.$id} style={{ overflow: "visible" }}>
               <Swipeable
-                containerStyle={{ overflow: "visible" }}
+                containerStyle={{ overflow: "hidden" }}
                 key={habit.$id}
                 ref={(ref) => {
                   if (ref) swipeableRefs.current[habit.$id] = ref;
                 }}
                 renderLeftActions={renderLeftActions}
                 renderRightActions={() => renderRightActions(habit.$id)}
-                onSwipeableOpen={(dir) =>
-                  dir === "left"
-                    ? handleDelete(habit.$id)
-                    : handleComplete(habit.$id)
-                }
+                onSwipeableOpen={(dir) => handleSwipe(dir, habit.$id)}
               >
                 <Surface
                   elevation={3}

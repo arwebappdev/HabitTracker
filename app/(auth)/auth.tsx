@@ -23,53 +23,62 @@ export default function AuthScreen() {
 
   // Handles both sign in and sign up logic
   const handleAuth = async () => {
-    // Input validation
     if (!email || !password) {
       setError("Please fill in all the fields.");
       return;
     }
 
-    // Password length check
     if (password.length < 6) {
       setError("Password's length must be at least 6 characters.");
       return;
     }
 
-    // Clear any previous errors
     setError(null);
 
-    // Handle Sign Up Flow
-    if (isSignUp) {
-      const error = await signUp(email, password); // Attempt to sign up user
-      if (error) {
-        setError(error); // Show any signup errors
+    try {
+      if (isSignUp) {
+        const error = await signUp(email, password);
+        if (error) {
+          setError(error);
+          return;
+        }
+
+        try {
+          await signOut();
+        } catch (signOutErr) {
+          console.warn("SignOut failed after signup:", signOutErr);
+        }
+
+        setEmail("");
+        setPassword("");
+        setIsSignUp(false);
+
+        if (Platform.OS === "android") {
+          ToastAndroid.show(
+            "Account created. Please sign in.",
+            ToastAndroid.SHORT
+          );
+        }
+
         return;
       }
 
-      // After signup, logout the user so they can sign in manually
-      await signOut();
+      const error = await signIn(email, password);
+      if (error) {
+        setError(error);
+        return;
+      }
 
-      // Reset form and switch to Sign In mode
       setEmail("");
       setPassword("");
-      setIsSignUp(false);
-
-      // Show toast notification (Android only)
-      ToastAndroid.show("Account created. Please sign in.", ToastAndroid.SHORT);
-      return;
+      router.replace("/");
+    } catch (err) {
+      console.error("Auth Error:", err);
+      setError("Something went wrong. Please try again.");
+      if (Platform.OS === "android") {
+        ToastAndroid.show("Error occurred. Try again.", ToastAndroid.SHORT);
+      }
     }
-
-    // Handle Sign In Flow
-    const error = await signIn(email, password); // Attempt to sign in
-    if (error) {
-      setError(error); // Show any login errors
-      return;
-    }
-
-    // Reset form and navigate to home page
-    setEmail("");
-    setPassword("");
-    router.replace("/");
   };
 
   return (

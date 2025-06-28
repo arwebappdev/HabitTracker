@@ -2,13 +2,19 @@ import { useAuth } from "@/lib/auth-context"; // Import authentication context
 import { MaterialCommunityIcons } from "@expo/vector-icons"; // Icon set used for focused tab icon
 import { Tabs } from "expo-router"; // Expo Router Tabs component for navigation
 import React from "react";
-import { useTheme } from "react-native-paper";
+import { ActivityIndicator, useTheme } from "react-native-paper";
 export default function TabsLayout() {
   const { user, isLoadingUser } = useAuth(); // Access the authenticated user from context
   const theme = useTheme();
 
-  if (isLoadingUser) return null; // or show a loading spinner
-  if (!user) return null; // block access if user is not logged in
+  if (isLoadingUser || !user) {
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      />
+    );
+  }
 
   return (
     // Main Tabs layout container

@@ -12,16 +12,16 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
   const segments = useSegments(); // get current route segments
 
   useEffect(() => {
-    const isLoginRoute = segments[0] === "(auth)"; // check if user is in 'auth' route group
+    const isLoginRoute = segments[0] === "(auth)";
 
-    // If user is not logged in and not on login/signup page, redirect to auth page
-    if (!user && !isLoginRoute && !isLoadingUser) {
-      router.replace("/(auth)/auth");
-    }
-
-    // If user is logged in and is on auth page, redirect to home
-    else if (user && isLoginRoute && !isLoadingUser) {
-      router.replace("/");
+    if (!isLoadingUser) {
+      setTimeout(() => {
+        if (!user && !isLoginRoute) {
+          router.replace("/(auth)/auth");
+        } else if (user && isLoginRoute) {
+          router.replace("/");
+        }
+      }, 0); // defer navigation until layout is mounted
     }
   }, [user, segments, isLoadingUser]);
 

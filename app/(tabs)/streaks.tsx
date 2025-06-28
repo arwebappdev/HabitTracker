@@ -21,11 +21,12 @@ export default function Streaks() {
   const theme = useTheme();
 
   const fetchHabits = async () => {
+    if (!user?.$id) return;
     try {
       const res = await databases.listDocuments(
         DATABASE_ID,
         HABITS_COLLECTION_ID,
-        [Query.equal("user_id", user?.$id ?? "")]
+        [Query.equal("user_id", user.$id)]
       );
       setHabits(res.documents as Habit[]);
     } catch (err) {
@@ -34,14 +35,14 @@ export default function Streaks() {
   };
 
   const fetchCompletions = async () => {
+    if (!user?.$id) return;
     try {
       const res = await databases.listDocuments(
         DATABASE_ID,
         COMPLETIONS_COLLECTION_ID,
-        [Query.equal("user_id", user?.$id ?? "")]
+        [Query.equal("user_id", user.$id)]
       );
-      const comps = res.documents as HabitCompletion[];
-      setCompletedHabits(comps);
+      setCompletedHabits(res.documents as HabitCompletion[]);
     } catch (err) {
       console.error("fetchCompletions error:", err);
     }
@@ -53,34 +54,41 @@ export default function Streaks() {
     const habitsChannel = `databases.${DATABASE_ID}.collections.${HABITS_COLLECTION_ID}.documents`;
     const completionsChannel = `databases.${DATABASE_ID}.collections.${COMPLETIONS_COLLECTION_ID}.documents`;
 
-    const unsubHabits = client.subscribe(
-      habitsChannel,
-      (resp: RealTimeResponse) => {
-        if (
-          resp.events.some((e) =>
-            /documents\..*\.(create|update|delete)$/.test(e)
-          )
-        ) {
-          fetchHabits();
-        }
-      }
-    );
+    let unsubHabits: () => void = () => {};
+    let unsubComps: () => void = () => {};
 
-    const unsubComps = client.subscribe(
-      completionsChannel,
-      (resp: RealTimeResponse) => {
-        if (resp.events.some((e) => /documents\..*\.create$/.test(e))) {
-          fetchCompletions();
+    try {
+      unsubHabits = client.subscribe(
+        habitsChannel,
+        (resp: RealTimeResponse) => {
+          if (
+            resp.events.some((e) =>
+              /documents\..*\.(create|update|delete)$/.test(e)
+            )
+          ) {
+            fetchHabits();
+          }
         }
-      }
-    );
+      );
+
+      unsubComps = client.subscribe(
+        completionsChannel,
+        (resp: RealTimeResponse) => {
+          if (resp.events.some((e) => /documents\..*\.create$/.test(e))) {
+            fetchCompletions();
+          }
+        }
+      );
+    } catch (err) {
+      console.error("Realtime subscription failed:", err);
+    }
 
     fetchHabits();
     fetchCompletions();
 
     return () => {
-      unsubHabits();
-      unsubComps();
+      unsubHabits?.();
+      unsubComps?.();
     };
   }, [user]);
 
